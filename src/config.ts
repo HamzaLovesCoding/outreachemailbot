@@ -31,7 +31,7 @@ export function getSenderName(): string {
 }
 
 export function getSenderContact(): string {
-  return process.env.SENDER_CONTACT ?? "hamza.w.3790@gmail.com";
+  return process.env.SENDER_CONTACT ?? "penguinempiremarketing@gmail.com";
 }
 
 /** Max number of INITIAL emails sent per run. */
