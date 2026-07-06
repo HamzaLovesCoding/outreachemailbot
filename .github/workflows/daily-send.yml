@@ -1,0 +1,61 @@
+name: Daily sponsorship outreach
+
+on:
+  schedule:
+    # 16:00 UTC = 9:00 AM Pacific (8:00 AM during standard time)
+    - cron: "0 16 * * *"
+  workflow_dispatch: {}
+
+# Never let two runs overlap — overlapping runs could double-send.
+concurrency:
+  group: daily-send
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  send-and-check:
+    runs-on: ubuntu-latest
+    # Worst case: ~30 staggered sends x up to 5 min apart.
+    timeout-minutes: 350
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run daily send-and-check
+        run: npm run send
+        env:
+          client_id: ${{ secrets.client_id }}
+          project_id: ${{ secrets.project_id }}
+          auth_uri: ${{ secrets.auth_uri }}
+          token_uri: ${{ secrets.token_uri }}
+          auth_provider_x509_cert_url: ${{ secrets.auth_provider_x509_cert_url }}
+          client_secret: ${{ secrets.client_secret }}
+          GMAIL_REFRESH_TOKEN: ${{ secrets.GMAIL_REFRESH_TOKEN }}
+          SENDER_NAME: ${{ secrets.SENDER_NAME }}
+          SENDER_CONTACT: ${{ secrets.SENDER_CONTACT }}
+
+      # The CSV is the bot's entire memory of who was emailed and when.
+      # It must be committed even if the send step failed partway through.
+      - name: Commit updated contact statuses
+        if: always()
+        run: |
+          if git diff --quiet -- data/contacts.csv; then
+            echo "No contact changes to commit."
+            exit 0
+          fi
+          git config user.name "outreach-bot"
+          git config user.email "actions@github.com"
+          git add data/contacts.csv
+          git commit -m "Update contact statuses ($(date -u +%F))"
+          git push
