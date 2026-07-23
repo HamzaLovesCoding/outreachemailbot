@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { Readable } from "node:stream";
 import { google, gmail_v1 } from "googleapis";
 import { OAuth2Client } from "google-auth-library";
 import MailComposer from "nodemailer/lib/mail-composer/index.js";
@@ -127,9 +128,11 @@ export async function sendInitialEmail(
   const mime = await buildMimeMessage(args);
   // Media upload (message/rfc822) instead of a base64 JSON body: the plain
   // endpoint rejects requests over ~5MB, and the attachments alone exceed that.
+  // googleapis' multipart uploader only accepts a string or Readable for
+  // media.body — a raw Buffer makes it crash trying to call .pipe() on it.
   const res = await gmail.users.messages.send({
     userId: "me",
-    media: { mimeType: "message/rfc822", body: mime },
+    media: { mimeType: "message/rfc822", body: Readable.from(mime) },
     requestBody: {},
   });
   const threadId = res.data.threadId;
@@ -159,7 +162,7 @@ export async function sendFollowUpEmail(
   });
   await gmail.users.messages.send({
     userId: "me",
-    media: { mimeType: "message/rfc822", body: mime },
+    media: { mimeType: "message/rfc822", body: Readable.from(mime) },
     requestBody: { threadId: args.threadId },
   });
 }
