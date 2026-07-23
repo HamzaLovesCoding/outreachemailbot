@@ -55,5 +55,14 @@ export const SEND_DELAY_MAX_MS = Number(
 /** When true, logs every action but sends nothing and writes nothing. */
 export const DRY_RUN = process.env.DRY_RUN === "true";
 
+/**
+ * When true, replaces the Gmail API with an in-memory fake (src/mockGmail.ts)
+ * so the full daily run can be tested with no Google credentials and no real
+ * emails. Combine with CONTACTS_CSV_PATH pointing at a throwaway CSV.
+ */
+export const MOCK_MODE = process.env.MOCK_MODE === "true";
+export const MOCK_SENDER_EMAIL =
+  process.env.MOCK_SENDER_EMAIL ?? "penguinempiremarketing@example.com";
+
 export const CONTACTS_CSV_PATH = process.env.CONTACTS_CSV_PATH ?? "data/contacts.csv";
 export const ATTACHMENTS_DIR = process.env.ATTACHMENTS_DIR ?? "Emailattachments";

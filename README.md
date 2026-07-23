@@ -42,9 +42,34 @@ is rewritten after every single action.
 
 ```bash
 npm run send              # run one full daily cycle now
-DRY_RUN=true npm run send # log everything, send/write nothing
+DRY_RUN=true npm run send # log everything, send/write nothing (still needs real creds)
 npm run typecheck
 ```
+
+## Mock testing (no Google account needed)
+
+`MOCK_MODE=true` replaces the Gmail API with an in-memory fake
+(`src/mockGmail.ts`), so you can watch a full run — batching, staggering,
+reply detection, the one-time follow-up, the permanent `responded` lock —
+without any credentials and without sending a single real email.
+
+```bash
+cp scripts/mock-data/contacts.seed.csv scripts/mock-data/contacts.csv
+MOCK_MODE=true \
+  CONTACTS_CSV_PATH=scripts/mock-data/contacts.csv \
+  MAX_INITIAL_SENDS_PER_RUN=2 \
+  SEND_DELAY_MIN_MS=50 SEND_DELAY_MAX_MS=150 \
+  npm run send
+```
+
+The seed CSV has one contact of each kind — `not_sent`, a quiet `sent`
+contact due for follow-up, a `sent` contact whose thread already has a
+reply, a too-recent `sent` contact, an already-`followed_up` contact, and
+an already-`responded` contact — so one run exercises every branch. Run the
+same command again on the same (now-updated) CSV to confirm nothing repeats:
+no second follow-up, no re-sent initial emails. When done, delete or
+re-copy `scripts/mock-data/contacts.csv` from the seed file to reset it —
+the seed file itself is never modified by the script.
 
 ## Contact statuses (`data/contacts.csv`)
 

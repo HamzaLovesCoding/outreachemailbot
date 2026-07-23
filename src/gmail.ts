@@ -4,7 +4,8 @@ import { google, gmail_v1 } from "googleapis";
 import { OAuth2Client } from "google-auth-library";
 import MailComposer from "nodemailer/lib/mail-composer/index.js";
 import type { Attachment } from "nodemailer/lib/mailer/index.js";
-import { getOAuthConfig, getRefreshToken } from "./config.js";
+import { MOCK_MODE, getOAuthConfig, getRefreshToken } from "./config.js";
+import { createMockGmail } from "./mockGmail.js";
 
 export function createOAuthClient(redirectUri?: string): OAuth2Client {
   const cfg = getOAuthConfig();
@@ -20,6 +21,7 @@ export function createOAuthClient(redirectUri?: string): OAuth2Client {
 }
 
 export function getGmail(): gmail_v1.Gmail {
+  if (MOCK_MODE) return createMockGmail();
   const auth = createOAuthClient();
   auth.setCredentials({ refresh_token: getRefreshToken() });
   return google.gmail({ version: "v1", auth });

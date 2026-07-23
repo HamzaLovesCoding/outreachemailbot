@@ -1,0 +1,9 @@
+name,email,status,threadId,sentDate,followUpDate
+Mock Not-Sent Alpha,alpha@example.com,not_sent,,,
+Mock Not-Sent Bravo,bravo@example.com,not_sent,,,
+Mock Not-Sent Charlie,charlie@example.com,not_sent,,,
+"Mock Quiet Cafe (old, no reply, should get follow-up)",quiet@example.com,sent,mock-thread-quiet-1,2026-06-26,
+"Mock Replied Cafe (already replied, should become responded)",replied@example.com,sent,mock-thread-replied-1,2026-06-26,
+"Mock Recent Shop (too new for follow-up, stays sent)",recent@example.com,sent,mock-thread-recent-1,2026-07-04,
+"Mock Already Followed Up (no reply yet, stays followed_up)",followedup@example.com,followed_up,mock-thread-followedup-1,2026-06-20,2026-06-27
+"Mock Already Responded (must never be touched again)",done@example.com,responded,mock-thread-done-1,2026-06-01,
